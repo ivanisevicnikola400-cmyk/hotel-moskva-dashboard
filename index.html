@@ -396,13 +396,16 @@ function setLoadingState(loading) {
 
 function getDemoData() {
   return {
-    stats: { totalReservations: 47, activeGuests: 12, todayCheckins: 3, todayCheckouts: 2, monthlyRevenue: 14580, avgRating: 4.6, totalCalls: 89, chatSessions: 34, reviewsSent: 38, positiveReviews: 31, negativeReviews: 7, emailsSent: 124 },
+    stats: { totalReservations: 47, activeGuests: 12, todayCheckins: 3, todayCheckouts: 2, monthlyRevenue: 14580, avgRating: 4.6, totalCalls: 89, chatSessions: 34, reviewsSent: 38, positiveReviews: 31, negativeReviews: 7, emailsSent: 124, bookingCount: 28, anaCount: 19 },
     recentReservations: [
       { id:"BK847291", guest:"Nikola Jović", room:"Superior Duplex", checkIn:"2026-02-25", checkOut:"2026-02-28", price:"390 EUR", source:"Booking.com", status:"Potvrđena" },
-      { id:"BK847290", guest:"Ana Marković", room:"Standard King", checkIn:"2026-02-24", checkOut:"2026-02-26", price:"194 EUR", source:"AI Agent Ana", status:"Aktivan" },
+      { id:"R847290", guest:"Ana Marković", room:"Standard King", checkIn:"2026-02-24", checkOut:"2026-02-26", price:"194 EUR", source:"AI Agent Ana", status:"Aktivan" },
       { id:"BK847289", guest:"John Smith", room:"Junior Suite", checkIn:"2026-02-24", checkOut:"2026-02-27", price:"600 EUR", source:"Booking.com", status:"Aktivan" },
-      { id:"BK847288", guest:"Milica Đorđević", room:"Premium Suite", checkIn:"2026-02-23", checkOut:"2026-02-25", price:"600 EUR", source:"AI Agent Ana", status:"Checked Out" },
-      { id:"BK847287", guest:"Peter Mueller", room:"Royal Suite", checkIn:"2026-02-22", checkOut:"2026-02-26", price:"1350 EUR", source:"Booking.com", status:"Aktivan" }
+      { id:"R847288", guest:"Milica Đorđević", room:"Premium Suite", checkIn:"2026-02-23", checkOut:"2026-02-25", price:"600 EUR", source:"AI Agent Ana", status:"Checked Out" },
+      { id:"BK847287", guest:"Peter Mueller", room:"Royal Suite", checkIn:"2026-02-22", checkOut:"2026-02-26", price:"1350 EUR", source:"Booking.com", status:"Aktivan" },
+      { id:"R847286", guest:"Marija Petrović", room:"Economy Single", checkIn:"2026-02-24", checkOut:"2026-02-25", price:"67 EUR", source:"AI Agent Ana", status:"Aktivan" },
+      { id:"BK847285", guest:"Hans Weber", room:"Standard Twin", checkIn:"2026-02-23", checkOut:"2026-02-26", price:"291 EUR", source:"Booking.com", status:"Aktivan" },
+      { id:"R847284", guest:"Dragan Nikolić", room:"Superior Duplex", checkIn:"2026-02-22", checkOut:"2026-02-24", price:"260 EUR", source:"AI Agent Ana", status:"Checked Out" }
     ],
     recentReviews: [
       { guest:"Milica Đorđević", rating:5, date:"2026-02-23", type:"Pozitivna" },
@@ -458,6 +461,8 @@ function renderTab() {
           ${statCard('⭐','Prosečna ocena',s.avgRating,'/5.0',1)}
         </div>
         <div class="stats-grid">
+          ${statCard('🌐','Booking.com',s.bookingCount||0,'rezervacija')}
+          ${statCard('🤖','Ana AI',s.anaCount||0,'rezervacija',1)}
           ${statCard('📞','Pozivi (Ana AI)',s.totalCalls,'ovog meseca')}
           ${statCard('💬','Chat sesije',s.chatSessions,'ovog meseca')}
           ${statCard('📧','Emailovi poslati',s.emailsSent,'follow-up + potvrde')}
