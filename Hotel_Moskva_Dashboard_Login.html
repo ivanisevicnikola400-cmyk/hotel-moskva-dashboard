@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Moskva — Management Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0A0A0F; --card: #111118; --card-border: #1E1E2A; --card-inner: #0D0D14;
+    --gold: #C9A84C; --gold-dark: #8B6914; --text: #DDD; --text-dim: #8B8B8B;
+    --text-dark: #555; --green: #2ECC71; --red: #E74C3C; --blue: #4A8CCA; --line: #1A1A24;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', -apple-system, sans-serif; min-height: 100vh; }
+
+  /* ===================== LOGIN SCREEN ===================== */
+  .login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #0F0F18 0%, #0A0A0F 70%);
+  }
+  .login-box {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 12px;
+    padding: 50px 44px; width: 400px; max-width: 90vw; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .login-stars { color: var(--gold); font-size: 12px; letter-spacing: 6px; margin-bottom: 10px; }
+  .login-hotel { font-family: Georgia, serif; font-size: 28px; color: #FFF; letter-spacing: 5px; }
+  .login-moskva { font-family: Georgia, serif; font-size: 36px; color: var(--gold); letter-spacing: 6px; font-weight: bold; margin: -2px 0 4px; }
+  .login-sub { font-size: 10px; color: var(--text-dark); letter-spacing: 4px; text-transform: uppercase; }
+  .login-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent); margin: 28px 0; }
+  .login-title { font-size: 12px; color: var(--text-dark); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px; }
+  
+  .login-input {
+    width: 100%; padding: 14px 18px; background: var(--card-inner); border: 1px solid var(--card-border);
+    border-radius: 6px; color: #FFF; font-size: 14px; font-family: inherit;
+    margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+  }
+  .login-input:focus { border-color: var(--gold); }
+  .login-input::placeholder { color: #333; }
+  
+  .login-btn {
+    width: 100%; padding: 14px; background: var(--gold); color: #0D0D14; border: none;
+    border-radius: 6px; font-size: 14px; font-weight: bold; letter-spacing: 2px;
+    cursor: pointer; font-family: Georgia, serif; transition: all 0.2s; margin-top: 6px;
+  }
+  .login-btn:hover { background: #D4B35A; transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  
+  .login-error {
+    background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2);
+    color: var(--red); padding: 10px 14px; border-radius: 6px;
+    font-size: 12px; margin-bottom: 14px; display: none;
+  }
+  
+  .login-footer { margin-top: 24px; font-size: 9px; color: #222; letter-spacing: 2px; }
+
+  /* ===================== DASHBOARD ===================== */
+  .dashboard-screen { display: none; }
+  
+  .header {
+    background: var(--card-inner); border-bottom: 1px solid var(--line);
+    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-stars { color: var(--gold); font-size: 11px; letter-spacing: 4px; }
+  .header-title { font-family: Georgia, serif; font-size: 18px; color: #FFF; letter-spacing: 3px; }
+  .header-title span { color: var(--gold); }
+  .header-sep { height: 28px; width: 1px; background: var(--card-border); }
+  .header-label { font-size: 12px; color: var(--text-dark); letter-spacing: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  
+  .user-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(201,168,76,0.08); padding: 6px 14px; border-radius: 20px;
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+  .user-avatar {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--gold);
+    color: #0D0D14; font-size: 11px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .user-name { font-size: 11px; color: var(--gold); }
+  .user-role { font-size: 9px; color: var(--text-dark); }
+  
+  .logout-btn {
+    background: none; border: 1px solid #2A2A34; border-radius: 4px;
+    color: var(--text-dark); font-size: 10px; padding: 6px 12px; cursor: pointer;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+  
+  .live-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; }
+  .live-badge.active { background: rgba(46,204,113,0.1); }
+  .live-badge.loading { background: rgba(201,168,76,0.1); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .live-dot.active { background: var(--green); }
+  .live-dot.loading { background: var(--gold); animation: pulse 1s infinite; }
+  .live-text { font-size: 11px; }
+  .live-text.active { color: var(--green); }
+  .live-text.loading { color: var(--gold); }
+  .update-time { font-size: 10px; color: #444; }
+  
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .tabs {
+    background: var(--card-inner); border-bottom: 1px solid var(--line);
+    padding: 0 28px; display: flex; gap: 0; overflow-x: auto;
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer; padding: 12px 20px;
+    font-size: 12px; letter-spacing: 1px; color: var(--text-dark);
+    border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: bold; }
+  .tab-btn:hover { color: var(--gold); }
+
+  .content { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+
+  /* Stat Cards */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 20px 18px; }
+  .stat-card.accent { border-top: 2px solid var(--gold); }
+  .stat-icon { font-size: 22px; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: bold; color: #FFF; font-family: Georgia, serif; }
+  .stat-card.accent .stat-value { color: var(--gold); }
+  .stat-label { font-size: 10px; color: var(--text-dark); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+  .stat-sub { font-size: 10px; color: #444; margin-top: 2px; }
+
+  /* Table Card */
+  .table-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .table-title { font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+  .table-action { background: none; border: 1px solid #2A2A34; border-radius: 4px; color: var(--text-dark); font-size: 10px; padding: 4px 12px; cursor: pointer; }
+  .table-action:hover { border-color: var(--gold); color: var(--gold); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { padding: 10px 14px; text-align: left; color: #444; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--line); color: #999; }
+  .td-id { color: var(--gold); font-family: monospace; font-size: 11px; }
+  .td-guest { color: #FFF; font-weight: bold; }
+  .td-price { color: var(--gold); font-weight: bold; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+  .badge-confirmed { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-active { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-checked-out { background: rgba(100,100,120,0.15); color: #888; }
+  .badge-booking { background: rgba(0,53,128,0.2); color: var(--blue); }
+  .badge-ana { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-positive { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-negative { background: rgba(231,76,60,0.15); color: var(--red); }
+  .badge-reservation { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-info { background: rgba(100,100,120,0.1); color: #888; }
+
+  .two-col { display: flex; gap: 16px; flex-wrap: wrap; }
+  .two-col > * { flex: 1 1 300px; }
+
+  .list-item { padding: 12px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .list-item:last-child { border-bottom: none; }
+  .list-name { color: #FFF; font-size: 13px; font-weight: bold; }
+  .list-sub { color: var(--text-dark); font-size: 10px; margin-top: 2px; }
+  .list-right { text-align: right; }
+  .stars { letter-spacing: 2px; font-size: 14px; }
+  .star-on { color: var(--gold); }
+  .star-off { color: #2A2A34; }
+
+  .call-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--card-inner); border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .call-info { display: flex; align-items: center; gap: 14px; }
+
+  .feedback-item { padding: 16px 20px; border-bottom: 1px solid var(--line); background: rgba(231,76,60,0.03); }
+  .feedback-comment { color: #DDD; font-size: 13px; font-style: italic; margin: 8px 0; line-height: 1.6; padding: 10px 14px; background: var(--card-inner); border: 1px solid var(--card-border); border-radius: 4px; }
+  .feedback-status { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(231,76,60,0.1); color: var(--red); font-weight: bold; }
+
+  .chat-item { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .chat-guest { background: #1A1A2E; color: #CCC; padding: 8px 14px; border-radius: 12px 12px 12px 2px; font-size: 12px; display: inline-block; max-width: 80%; }
+  .chat-ana { background: rgba(201,168,76,0.1); color: var(--gold); padding: 8px 14px; border-radius: 12px 12px 2px 12px; font-size: 12px; display: inline-block; max-width: 80%; margin-left: 20%; }
+  .chat-meta { font-size: 9px; color: #444; margin-top: 4px; }
+
+  .footer { padding: 20px 28px; text-align: center; border-top: 1px solid var(--line); margin-top: 40px; }
+  .footer-title { font-size: 10px; color: #333; letter-spacing: 3px; }
+  .footer-sub { font-size: 9px; color: #222; }
+
+  .refresh-btn { background: none; border: 1px solid #2A2A34; border-radius: 4px; color: var(--text-dark); font-size: 10px; padding: 4px 10px; cursor: pointer; }
+  .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  @media (max-width: 768px) {
+    .content { padding: 16px 12px; }
+    .header { padding: 12px 16px; }
+    .tabs { padding: 0 12px; }
+    .login-box { padding: 36px 28px; }
+    .stat-value { font-size: 22px; }
+    .two-col > * { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-stars">★ ★ ★ ★</div>
+    <div class="login-hotel">HOTEL</div>
+    <div class="login-moskva">MOSKVA</div>
+    <div class="login-sub">Beograd · Terazije · od 1908.</div>
+    <div class="login-divider"></div>
+    <div class="login-title">Management Dashboard</div>
+    
+    <div class="login-error" id="loginError"></div>
+    
+    <input type="text" class="login-input" id="username" placeholder="Korisničko ime" autocomplete="username" autofocus>
+    <input type="password" class="login-input" id="password" placeholder="Lozinka" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">PRIJAVITE SE</button>
+    
+    <div class="login-footer">POWERED BY AI · NOLIMITNIKOLA</div>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div class="dashboard-screen" id="dashboardScreen">
+  <div class="header">
+    <div class="header-left">
+      <div>
+        <div class="header-stars">★ ★ ★ ★</div>
+        <div class="header-title">HOTEL <span>MOSKVA</span></div>
+      </div>
+      <div class="header-sep"></div>
+      <span class="header-label">DASHBOARD</span>
+    </div>
+    <div class="header-right">
+      <div class="user-badge">
+        <div class="user-avatar" id="userAvatar">M</div>
+        <div>
+          <div class="user-name" id="userName">admin</div>
+          <div class="user-role" id="userRole">Admin</div>
+        </div>
+      </div>
+      <button class="refresh-btn" onclick="fetchData()">↻ Osveži</button>
+      <div class="live-badge active" id="liveBadge">
+        <div class="live-dot active" id="liveDot"></div>
+        <span class="live-text active" id="liveText">Live</span>
+      </div>
+      <span class="update-time" id="updateTime">--:--:--</span>
+      <button class="logout-btn" onclick="doLogout()">Odjavi se</button>
+    </div>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview',this)">Pregled</button>
+    <button class="tab-btn" data-tab="reservations" onclick="switchTab('reservations',this)">Rezervacije</button>
+    <button class="tab-btn" data-tab="reviews" onclick="switchTab('reviews',this)">Recenzije</button>
+    <button class="tab-btn" data-tab="calls" onclick="switchTab('calls',this)">Pozivi & Chat</button>
+    <button class="tab-btn" data-tab="feedback" onclick="switchTab('feedback',this)">Feedback</button>
+  </div>
+  
+  <div class="content" id="mainContent"></div>
+  
+  <div class="footer">
+    <div class="footer-title">★ HOTEL MOSKVA MANAGEMENT SYSTEM ★</div>
+    <div class="footer-sub">Powered by AI · Ana Agent · n8n Automation</div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const LOGIN_URL = 'https://nolimitnikola.app.n8n.cloud/webhook/hotel-dashboard-login';
+const DATA_URL = 'https://nolimitnikola.app.n8n.cloud/webhook/hotel-dashboard-data';
+
+let dashData = null;
+let currentTab = 'overview';
+let sessionToken = null;
+let sessionUser = null;
+let refreshInterval = null;
+
+// ===================== LOGIN =====================
+// Enter key on inputs
+document.getElementById('username').addEventListener('keyup', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+document.getElementById('password').addEventListener('keyup', e => { if (e.key === 'Enter') doLogin(); });
+
+// Check saved session
+const saved = sessionStorage.getItem('hm_session');
+if (saved) {
+  try {
+    const s = JSON.parse(saved);
+    if (s.token && s.username) {
+      sessionToken = s.token;
+      sessionUser = s;
+      showDashboard();
+    }
+  } catch(e) {}
+}
+
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value.trim();
+  
+  if (!user || !pass) {
+    errEl.textContent = 'Unesite korisničko ime i lozinku';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'PRIJAVLJIVANJE...';
+  errEl.style.display = 'none';
+  
+  try {
+    const res = await fetch(LOGIN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      sessionToken = data.token;
+      sessionUser = data;
+      sessionStorage.setItem('hm_session', JSON.stringify(data));
+      showDashboard();
+    } else {
+      errEl.textContent = data.message || 'Pogrešno korisničko ime ili lozinka';
+      errEl.style.display = 'block';
+    }
+  } catch (e) {
+    errEl.textContent = 'Greška pri povezivanju. Proverite internet konekciju.';
+    errEl.style.display = 'block';
+  }
+  
+  btn.disabled = false;
+  btn.textContent = 'PRIJAVITE SE';
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  
+  if (sessionUser) {
+    const name = sessionUser.username || 'user';
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent = sessionUser.hotel || name;
+    document.getElementById('userRole').textContent = sessionUser.role === 'admin' ? 'Administrator' : 'Viewer';
+  }
+  
+  fetchData();
+  refreshInterval = setInterval(fetchData, 60000);
+}
+
+function doLogout() {
+  sessionToken = null;
+  sessionUser = null;
+  sessionStorage.removeItem('hm_session');
+  if (refreshInterval) clearInterval(refreshInterval);
+  
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+// ===================== DATA =====================
+async function fetchData() {
+  setLoadingState(true);
+  
+  try {
+    const res = await fetch(DATA_URL);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.stats) dashData = json;
+    }
+  } catch (e) {}
+  
+  if (!dashData) dashData = getDemoData();
+  
+  setLoadingState(false);
+  document.getElementById('updateTime').textContent = new Date().toLocaleTimeString('sr-RS');
+  renderTab();
+}
+
+function setLoadingState(loading) {
+  const badge = document.getElementById('liveBadge');
+  const dot = document.getElementById('liveDot');
+  const text = document.getElementById('liveText');
+  if (loading) {
+    badge.className = 'live-badge loading'; dot.className = 'live-dot loading';
+    text.className = 'live-text loading'; text.textContent = 'Ažuriranje...';
+  } else {
+    badge.className = 'live-badge active'; dot.className = 'live-dot active';
+    text.className = 'live-text active'; text.textContent = 'Live';
+  }
+}
+
+function getDemoData() {
+  return {
+    stats: { totalReservations: 47, activeGuests: 12, todayCheckins: 3, todayCheckouts: 2, monthlyRevenue: 14580, avgRating: 4.6, totalCalls: 89, chatSessions: 34, reviewsSent: 38, positiveReviews: 31, negativeReviews: 7, emailsSent: 124 },
+    recentReservations: [
+      { id:"BK847291", guest:"Nikola Jović", room:"Superior Duplex", checkIn:"2026-02-25", checkOut:"2026-02-28", price:"390 EUR", source:"Booking.com", status:"Potvrđena" },
+      { id:"BK847290", guest:"Ana Marković", room:"Standard King", checkIn:"2026-02-24", checkOut:"2026-02-26", price:"194 EUR", source:"AI Agent Ana", status:"Aktivan" },
+      { id:"BK847289", guest:"John Smith", room:"Junior Suite", checkIn:"2026-02-24", checkOut:"2026-02-27", price:"600 EUR", source:"Booking.com", status:"Aktivan" },
+      { id:"BK847288", guest:"Milica Đorđević", room:"Premium Suite", checkIn:"2026-02-23", checkOut:"2026-02-25", price:"600 EUR", source:"AI Agent Ana", status:"Checked Out" },
+      { id:"BK847287", guest:"Peter Mueller", room:"Royal Suite", checkIn:"2026-02-22", checkOut:"2026-02-26", price:"1350 EUR", source:"Booking.com", status:"Aktivan" }
+    ],
+    recentReviews: [
+      { guest:"Milica Đorđević", rating:5, date:"2026-02-23", type:"Pozitivna" },
+      { guest:"Marko Nikolić", rating:4, date:"2026-02-22", type:"Pozitivna" },
+      { guest:"Sarah Johnson", rating:5, date:"2026-02-21", type:"Pozitivna" },
+      { guest:"Ivan Popović", rating:2, date:"2026-02-20", type:"Negativna" }
+    ],
+    recentFeedback: [
+      { guest:"Ivan Popović", email:"ivan@gmail.com", rating:"2", comment:"Soba je bila hladna, grejanje nije radilo.", status:"Novo - Čeka odgovor", date:"2026-02-20" }
+    ],
+    recentEvents: [
+      { time:"2026-02-24 14:32", caller:"+381 64 123 4567", type:"Poziv", details:"Rezervacija za 2 osobe" },
+      { time:"2026-02-24 13:15", caller:"+381 63 987 6543", type:"Poziv", details:"Pitanje o cenama" },
+      { time:"2026-02-24 11:48", caller:"+44 20 7946 0958", type:"Poziv", details:"Rezervacija suite" },
+      { time:"2026-02-24 10:05", caller:"+381 61 555 3333", type:"Poziv", details:"Transfer sa aerodroma" }
+    ],
+    recentChats: [
+      { date:"2026-02-24 15:10", sessionId:"ch_001", message:"Zdravo, koliko košta noćenje?", reply:"Dobar dan! Cene počinju od 67 EUR za Economy sobu...", language:"sr" },
+      { date:"2026-02-24 14:45", sessionId:"ch_002", message:"Do you have a spa?", reply:"Yes! Our EVA Spa & Wellness center is free for all guests...", language:"en" }
+    ]
+  };
+}
+
+// ===================== HELPERS =====================
+function starsHtml(r) { let h='<span class="stars">'; for(let i=1;i<=5;i++) h+=`<span class="${i<=r?'star-on':'star-off'}">★</span>`; return h+'</span>'; }
+function statusBadge(s) { const c={'Potvrđena':'badge-confirmed','Aktivan':'badge-active','Checked Out':'badge-checked-out'}[s]||'badge-confirmed'; return `<span class="badge ${c}">${s}</span>`; }
+function sourceBadge(s) { return (s||'').toLowerCase().includes('booking') ? `<span class="badge badge-booking">Booking</span>` : `<span class="badge badge-ana">Ana AI</span>`; }
+function statCard(i,l,v,sub,a) { return `<div class="stat-card ${a?'accent':''}"><div class="stat-icon">${i}</div><div class="stat-value">${v}</div><div class="stat-label">${l}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`; }
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTab();
+}
+
+// ===================== RENDER =====================
+function renderTab() {
+  const el = document.getElementById('mainContent');
+  if (!dashData) return;
+  const s = dashData.stats;
+  const rr = s.reviewsSent > 0 ? Math.round((s.positiveReviews / s.reviewsSent) * 100) : 0;
+
+  switch (currentTab) {
+    case 'overview':
+      el.innerHTML = `
+        <div class="stats-grid">
+          ${statCard('📋','Rezervacije',s.totalReservations,'ukupno',1)}
+          ${statCard('🏨','Aktivni gosti',s.activeGuests,'trenutno')}
+          ${statCard('➡️','Check-in danas',s.todayCheckins)}
+          ${statCard('⬅️','Check-out danas',s.todayCheckouts)}
+          ${statCard('💰','Prihod (mesec)','€'+s.monthlyRevenue.toLocaleString(),'',1)}
+          ${statCard('⭐','Prosečna ocena',s.avgRating,'/5.0',1)}
+        </div>
+        <div class="stats-grid">
+          ${statCard('📞','Pozivi (Ana AI)',s.totalCalls,'ovog meseca')}
+          ${statCard('💬','Chat sesije',s.chatSessions,'ovog meseca')}
+          ${statCard('📧','Emailovi poslati',s.emailsSent,'follow-up + potvrde')}
+          ${statCard('⭐','Pozitivne recenzije',rr+'%',s.positiveReviews+'/'+s.reviewsSent,1)}
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">✦ Poslednje rezervacije</span>
+            <button class="table-action" onclick="switchTab('reservations',document.querySelector('[data-tab=reservations]'))">Sve →</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>ID</th><th>Gost</th><th>Soba</th><th>Check-in</th><th>Cena</th><th>Izvor</th><th>Status</th></tr></thead><tbody>
+            ${dashData.recentReservations.slice(0,3).map(r=>`<tr><td class="td-id">${r.id}</td><td class="td-guest">${r.guest}</td><td>${r.room}</td><td>${r.checkIn}</td><td class="td-price">${r.price}</td><td>${sourceBadge(r.source)}</td><td>${statusBadge(r.status)}</td></tr>`).join('')}
+          </tbody></table></div>
+        </div>
+        <div class="two-col">
+          <div class="table-card">
+            <div class="table-header"><span class="table-title">✦ Poslednje ocene</span></div>
+            ${dashData.recentReviews.slice(0,4).map(r=>`<div class="list-item"><div><div class="list-name">${r.guest}</div><div class="list-sub">${r.date}</div></div><div class="list-right">${starsHtml(r.rating)}<div style="margin-top:2px"><span class="badge ${r.rating>=4?'badge-positive':'badge-negative'}">${r.rating>=4?'→ Google Review':'→ Interni feedback'}</span></div></div></div>`).join('')}
+          </div>
+          <div class="table-card">
+            <div class="table-header"><span class="table-title">✦ Poslednji pozivi (Ana AI)</span></div>
+            ${dashData.recentEvents.slice(0,4).map(c=>`<div class="list-item"><div class="call-info"><div class="call-icon">📞</div><div><div class="list-name">${c.caller}</div><div class="list-sub">${c.time}</div></div></div><span class="badge ${(c.details||'').toLowerCase().includes('rezervacija')?'badge-reservation':'badge-info'}">${c.details?(c.details).substring(0,25):c.type}</span></div>`).join('')}
+          </div>
+        </div>`;
+      break;
+
+    case 'reservations':
+      el.innerHTML = `
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">✦ Sve rezervacije</span></div>
+          <div class="table-wrap"><table><thead><tr><th>ID</th><th>Gost</th><th>Soba</th><th>Check-in</th><th>Check-out</th><th>Cena</th><th>Izvor</th><th>Status</th></tr></thead><tbody>
+            ${dashData.recentReservations.map(r=>`<tr><td class="td-id">${r.id}</td><td class="td-guest">${r.guest}</td><td>${r.room}</td><td>${r.checkIn}</td><td>${r.checkOut}</td><td class="td-price">${r.price}</td><td>${sourceBadge(r.source)}</td><td>${statusBadge(r.status)}</td></tr>`).join('')}
+          </tbody></table></div>
+        </div>`;
+      break;
+
+    case 'reviews':
+      el.innerHTML = `
+        <div class="stats-grid">
+          ${statCard('📨','Ankete poslate',s.reviewsSent,'',1)}
+          ${statCard('😊','Pozitivne (4-5)',s.positiveReviews,'→ Google Review')}
+          ${statCard('😞','Negativne (1-3)',s.negativeReviews,'→ Interni feedback')}
+          ${statCard('📈','Pozitivna stopa',rr+'%','',1)}
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">✦ Sve ocene gostiju</span></div>
+          ${dashData.recentReviews.map(r=>`<div class="list-item" style="${r.rating<4?'background:rgba(231,76,60,0.03)':''}"><div><div style="display:flex;align-items:center;gap:12px"><span class="list-name">${r.guest}</span>${starsHtml(r.rating)}</div><div class="list-sub">${r.date}</div></div><span class="badge ${r.rating>=4?'badge-positive':'badge-negative'}">${r.rating>=4?'Google Review ↗':'⚠ Potrebna akcija'}</span></div>`).join('')}
+        </div>`;
+      break;
+
+    case 'calls':
+      el.innerHTML = `
+        <div class="stats-grid">
+          ${statCard('📞','Ukupno poziva',s.totalCalls,'',1)}
+          ${statCard('💬','Chat sesije',s.chatSessions)}
+          ${statCard('📧','Emailovi',s.emailsSent)}
+          ${statCard('🤖','AI Agent','Ana','24/7 aktivna',1)}
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">✦ Pozivi</span></div>
+          ${dashData.recentEvents.map(c=>`<div class="list-item"><div class="call-info"><div class="call-icon">📞</div><div><div class="list-name">${c.caller}</div><div class="list-sub">${c.time} · ${c.type}</div></div></div><span class="badge badge-info">${c.details?(c.details).substring(0,30):'N/A'}</span></div>`).join('')}
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">✦ Chat sesije</span></div>
+          ${dashData.recentChats.length>0?dashData.recentChats.map(c=>`<div class="chat-item"><div class="chat-meta">${c.date} · Sesija: ${c.sessionId} · ${c.language==='sr'?'🇷🇸':'🇬🇧'}</div><div style="margin-top:8px"><div class="chat-guest">${c.message}</div></div><div style="margin-top:6px;text-align:right"><div class="chat-ana">${c.reply?(c.reply).substring(0,120)+'...':'N/A'}</div></div></div>`).join(''):'<div style="padding:30px;text-align:center;color:#444">Nema chat sesija</div>'}
+        </div>`;
+      break;
+
+    case 'feedback':
+      el.innerHTML = `
+        <div class="stats-grid">
+          ${statCard('📝','Ukupno feedbacka',dashData.recentFeedback.length,'',1)}
+          ${statCard('⚠️','Čeka odgovor',dashData.recentFeedback.filter(f=>(f.status||'').includes('Novo')).length)}
+        </div>
+        <div class="table-card">
+          <div class="table-header"><span class="table-title">✦ Feedback od nezadovoljnih gostiju</span></div>
+          ${dashData.recentFeedback.length>0?dashData.recentFeedback.map(f=>`<div class="feedback-item"><div style="display:flex;justify-content:space-between;align-items:center"><div><span class="list-name">${f.guest}</span><span style="color:#555;font-size:11px;margin-left:8px">(${f.email})</span></div><div style="display:flex;align-items:center;gap:10px">${starsHtml(parseInt(f.rating)||0)}<span class="feedback-status">${f.status}</span></div></div><div class="feedback-comment">"${f.comment}"</div><div class="list-sub">${f.date}</div></div>`).join(''):'<div style="padding:40px;text-align:center;color:#444;font-size:14px">🎉 Nema negativnog feedbacka!</div>'}
+        </div>`;
+      break;
+  }
+}
+</script>
+</body>
+</html>
