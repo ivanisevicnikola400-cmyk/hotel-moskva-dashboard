@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hotel Moskva — Pomoć u sobi</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0B0E14;--sf:#12161F;--bd:#1C2130;--tx:#E8E8E8;--dim:#7B8294;--gld:#C9A84C;--grn:#22C55E;--red:#EF4444;--yel:#EAB308;--blu:#3B82F6}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;user-select:none}
+.head{text-align:center;padding:30px 20px 20px}
+.orn{font-size:20px;color:var(--gld);letter-spacing:6px;margin-bottom:6px}
+.htl{font-size:28px;font-weight:700;color:#FFF;letter-spacing:3px}
+.hsub{font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.rmid{display:inline-block;background:linear-gradient(135deg,var(--gld),#8B6914);color:#FFF;font-size:13px;font-weight:700;padding:6px 20px;border-radius:20px;margin-top:12px;letter-spacing:2px}
+.content{flex:1;padding:16px 20px;overflow-y:auto}
+.greet{font-size:18px;color:#FFF;font-weight:600;margin-bottom:4px}
+.greet-sub{font-size:13px;color:var(--dim);margin-bottom:24px;line-height:1.5}
+.section-t{font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{background:var(--sf);border:2px solid var(--bd);border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .2s}
+.cat:active{transform:scale(.97)}
+.cat-icon{font-size:36px;margin-bottom:8px}
+.cat-name{font-size:13px;font-weight:600;color:#FFF;margin-bottom:2px}
+.cat-desc{font-size:10px;color:var(--dim);line-height:1.4}
+.cat.urg{border-color:rgba(239,68,68,.3)}.cat.rs{border-color:rgba(234,179,8,.3)}.cat.hs{border-color:rgba(34,197,94,.3)}.cat.inf{border-color:rgba(59,130,246,.3)}
+.sub-panel{display:none;padding:0 0 20px}.sub-panel.show{display:block}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gld);cursor:pointer;margin-bottom:16px;padding:8px 0}
+.sub-title{font-size:16px;font-weight:700;color:#FFF;margin-bottom:4px}
+.sub-desc{font-size:11px;color:var(--dim);margin-bottom:16px}
+.opt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.opt:active{background:rgba(255,255,255,.03);transform:scale(.99)}
+.opt-icon{font-size:22px;width:40px;text-align:center}
+.opt-text{font-size:13px;color:var(--tx)}
+.opt-arrow{margin-left:auto;color:var(--dim);font-size:14px}
+.custom-ta{width:100%;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;font-size:14px;color:var(--tx);font-family:inherit;resize:none;height:100px;outline:none}
+.custom-ta:focus{border-color:var(--gld)}
+.custom-ta::placeholder{color:var(--dim)}
+.send-btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;transition:all .2s;letter-spacing:1px}
+.send-btn.urg{background:var(--red);color:#FFF}.send-btn.req{background:var(--gld);color:#0B0E14}
+.send-btn:active{transform:scale(.98);filter:brightness(.9)}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+.success{display:none;text-align:center;padding:40px 20px}.success.show{display:block}
+.success-icon{font-size:60px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:700;color:#FFF;margin-bottom:8px}
+.success-msg{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:24px}
+.success-btn{display:inline-block;padding:12px 32px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;color:var(--tx);font-size:13px;cursor:pointer}
+.qbar{background:var(--sf);border-top:1px solid var(--bd);padding:12px 20px;display:flex;justify-content:space-around;text-align:center}
+.qi{font-size:9px;color:var(--dim);letter-spacing:1px}.qi-v{font-size:12px;color:#FFF;font-weight:600;margin-bottom:2px}
+.sending{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;font-size:16px;color:#FFF}
+.sending.show{display:flex}
+</style>
+</head>
+<body>
+<div class="head">
+  <div class="orn">✦ ✦ ✦ ✦</div>
+  <div class="htl">HOTEL MOSKVA</div>
+  <div class="hsub">Beograd · od 1908. godine</div>
+  <div class="rmid" id="roomDisplay">SOBA 203</div>
+</div>
+<div class="content">
+  <div id="mainMenu">
+    <div class="greet" id="greeting">Dobro veče</div>
+    <div class="greet-sub">Kako Vam možemo pomoći? Izaberite kategoriju ili nam pošaljite poruku.</div>
+    <div class="cats">
+      <div class="cat urg" onclick="showSub('urgent')"><div class="cat-icon">🚨</div><div class="cat-name">Hitni problem</div><div class="cat-desc">Klima, TV, voda, grejanje</div></div>
+      <div class="cat rs" onclick="showSub('service')"><div class="cat-icon">🍽️</div><div class="cat-name">Room Service</div><div class="cat-desc">Hrana, piće, narudžbe</div></div>
+      <div class="cat hs" onclick="showSub('housekeeping')"><div class="cat-icon">🛏️</div><div class="cat-name">Housekeeping</div><div class="cat-desc">Peškiri, čaršavi, čišćenje</div></div>
+      <div class="cat inf" onclick="showSub('info')"><div class="cat-icon">ℹ️</div><div class="cat-name">Informacije</div><div class="cat-desc">WiFi, checkout, parking</div></div>
+    </div>
+    <div class="section-t" style="margin-top:24px">Ili pošaljite slobodnu poruku</div>
+    <div><textarea class="custom-ta" id="customMsg" placeholder="Napišite šta Vam treba..."></textarea><button class="send-btn req" onclick="sendCustom()">POŠALJI PORUKU</button></div>
+  </div>
+  <div class="sub-panel" id="sub-urgent">
+    <div class="back-btn" onclick="goBack()">← Nazad</div>
+    <div class="sub-title">🚨 Hitni problemi</div><div class="sub-desc">Naš tim će reagovati odmah.</div>
+    <div class="opt" onclick="sendReq('urgent','Klima ne radi')"><div class="opt-icon">❄️</div><div class="opt-text">Klima ne radi</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('urgent','TV ne radi')"><div class="opt-icon">📺</div><div class="opt-text">TV ne radi</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('urgent','Problem sa vodom')"><div class="opt-icon">🚿</div><div class="opt-text">Problem sa vodom</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('urgent','Grejanje ne radi')"><div class="opt-icon">🔥</div><div class="opt-text">Grejanje ne radi</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('urgent','Nema struje')"><div class="opt-icon">⚡</div><div class="opt-text">Nema struje</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('urgent','Problem sa bravom')"><div class="opt-icon">🔐</div><div class="opt-text">Problem sa bravom</div><div class="opt-arrow">›</div></div>
+    <div style="margin-top:12px"><textarea class="custom-ta" id="urgMsg" placeholder="Opišite detaljnije (opciono)..." style="height:70px"></textarea><button class="send-btn urg" onclick="sendUrgCustom()">⚠ POŠALJI HITAN ZAHTEV</button></div>
+  </div>
+  <div class="sub-panel" id="sub-service">
+    <div class="back-btn" onclick="goBack()">← Nazad</div>
+    <div class="sub-title">🍽️ Room Service</div><div class="sub-desc">Poručite hranu ili piće u sobu.</div>
+    <div class="opt" onclick="sendReq('request','Doručak u sobu')"><div class="opt-icon">🥐</div><div class="opt-text">Doručak u sobu</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Kafa / Čaj')"><div class="opt-icon">☕</div><div class="opt-text">Kafa / Čaj</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Voće u sobu')"><div class="opt-icon">🍇</div><div class="opt-text">Voće u sobu</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Moskva šnit')"><div class="opt-icon">🍰</div><div class="opt-text">Moskva šnit</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Voda / Sokovi')"><div class="opt-icon">🥤</div><div class="opt-text">Voda / Sokovi</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Vino / Šampanjac')"><div class="opt-icon">🍷</div><div class="opt-text">Vino / Šampanjac</div><div class="opt-arrow">›</div></div>
+    <div style="margin-top:12px"><textarea class="custom-ta" id="svcMsg" placeholder="Posebne želje..." style="height:70px"></textarea><button class="send-btn req" onclick="sendSvcCustom()">PORUČI</button></div>
+  </div>
+  <div class="sub-panel" id="sub-housekeeping">
+    <div class="back-btn" onclick="goBack()">← Nazad</div>
+    <div class="sub-title">🛏️ Housekeeping</div><div class="sub-desc">Dodatni artikli ili čišćenje.</div>
+    <div class="opt" onclick="sendReq('request','Dodatni peškiri')"><div class="opt-icon">🛁</div><div class="opt-text">Dodatni peškiri</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Dodatno ćebe')"><div class="opt-icon">🛏️</div><div class="opt-text">Dodatno ćebe</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Promena čaršava')"><div class="opt-icon">✨</div><div class="opt-text">Promena čaršava</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Čišćenje sobe')"><div class="opt-icon">🧹</div><div class="opt-text">Čišćenje sobe</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Dodatni jastuci')"><div class="opt-icon">💤</div><div class="opt-text">Dodatni jastuci</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Toaletne potrepštine')"><div class="opt-icon">🧴</div><div class="opt-text">Toaletne potrepštine</div><div class="opt-arrow">›</div></div>
+  </div>
+  <div class="sub-panel" id="sub-info">
+    <div class="back-btn" onclick="goBack()">← Nazad</div>
+    <div class="sub-title">ℹ️ Informacije</div><div class="sub-desc">Korisne informacije o hotelu.</div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">📶</div><div class="opt-text"><strong>WiFi:</strong> HotelMoskva_Guest<br><span style="font-size:11px;color:var(--dim)">Lozinka: Moskva1908!</span></div></div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">🕐</div><div class="opt-text"><strong>Check-out:</strong> do 12:00<br><span style="font-size:11px;color:var(--dim)">Kasni check-out na upit</span></div></div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">🅿️</div><div class="opt-text"><strong>Parking:</strong> 20 EUR/dan<br><span style="font-size:11px;color:var(--dim)">Hotelska garaža, -1 nivo</span></div></div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">🧖‍♀️</div><div class="opt-text"><strong>EVA Spa:</strong> Besplatno<br><span style="font-size:11px;color:var(--dim)">07:00-22:00 · sauna, đakuzi</span></div></div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">🍰</div><div class="opt-text"><strong>Poslastičarnica:</strong> Moskva šnit<br><span style="font-size:11px;color:var(--dim)">Prizemlje · 07:00-23:00</span></div></div>
+    <div class="opt" style="cursor:default"><div class="opt-icon">📞</div><div class="opt-text"><strong>Recepcija:</strong> +381 11 268 6255<br><span style="font-size:11px;color:var(--dim)">24/7</span></div></div>
+    <div class="opt" onclick="sendReq('request','Kasni check-out — molim potvrdu')"><div class="opt-icon">🕑</div><div class="opt-text" style="color:var(--gld)">Zatraži kasni check-out</div><div class="opt-arrow">›</div></div>
+    <div class="opt" onclick="sendReq('request','Transfer do aerodroma')"><div class="opt-icon">✈️</div><div class="opt-text" style="color:var(--gld)">Zakaži transfer</div><div class="opt-arrow">›</div></div>
+  </div>
+  <div class="success" id="successScreen">
+    <div class="success-icon" id="successIcon">✅</div>
+    <div class="success-title" id="successTitle">Zahtev poslat!</div>
+    <div class="success-msg" id="successMsg">Naš tim je obavešten.</div>
+    <div class="success-btn" onclick="goHome()">← Povratak na početnu</div>
+  </div>
+</div>
+<div class="qbar">
+  <div class="qi"><div class="qi-v">14:00</div>CHECK-IN</div>
+  <div class="qi"><div class="qi-v">12:00</div>CHECK-OUT</div>
+  <div class="qi"><div class="qi-v">24/7</div>RECEPCIJA</div>
+  <div class="qi"><div class="qi-v">FREE</div>SPA & WiFi</div>
+</div>
+<div class="sending" id="sendingOverlay">⏳ Šaljem zahtev...</div>
+
+<script>
+const API = 'https://nolimitnikola.app.n8n.cloud/webhook/emanadzer-request';
+const ROOM = '203'; // Configure per tablet
+document.getElementById('roomDisplay').textContent = 'SOBA ' + ROOM;
+const h = new Date().getHours();
+document.getElementById('greeting').textContent = h<12?'Dobro jutro':h<18?'Dobar dan':'Dobro veče';
+
+function showSub(c){document.getElementById('mainMenu').style.display='none';document.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('show'));document.getElementById('sub-'+c).classList.add('show');document.getElementById('successScreen').classList.remove('show')}
+function goBack(){document.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('show'));document.getElementById('mainMenu').style.display='block';document.getElementById('successScreen').classList.remove('show')}
+function goHome(){goBack();window.scrollTo(0,0)}
+
+async function sendReq(type, msg) {
+  document.getElementById('sendingOverlay').classList.add('show');
+  try {
+    const r = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({room:ROOM, type:type, category:type==='urgent'?'urgent':'service', message:msg, guestName:''})
+    });
+    const data = await r.json();
+    console.log('Response:', data);
+  } catch(e) { console.error('Send error:', e); }
+  document.getElementById('sendingOverlay').classList.remove('show');
+  showSuccess(type, msg);
+}
+
+function sendCustom(){const m=document.getElementById('customMsg').value.trim();if(!m)return;sendReq('request',m);document.getElementById('customMsg').value=''}
+function sendUrgCustom(){const m=document.getElementById('urgMsg').value.trim();sendReq('urgent',m||'Hitan problem');document.getElementById('urgMsg').value=''}
+function sendSvcCustom(){const m=document.getElementById('svcMsg').value.trim();if(!m)return;sendReq('request','Room service: '+m);document.getElementById('svcMsg').value=''}
+
+function showSuccess(type, msg) {
+  document.getElementById('mainMenu').style.display='none';
+  document.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('successScreen').classList.add('show');
+  if(type==='urgent'){
+    document.getElementById('successIcon').textContent='🚨';
+    document.getElementById('successTitle').textContent='Hitna prijava poslata!';
+    document.getElementById('successMsg').textContent='"'+msg+'" — Naš tim dolazi odmah.';
+  } else {
+    document.getElementById('successIcon').textContent='✅';
+    document.getElementById('successTitle').textContent='Zahtev primljen!';
+    document.getElementById('successMsg').textContent='"'+msg+'" — Prosečno vreme: 5 minuta. Hvala!';
+  }
+}
+</script>
+</body>
+</html>
